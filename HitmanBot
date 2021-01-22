@@ -1,0 +1,89 @@
+import discord
+from discord.ext import commands
+
+
+token = 'ODAxOTQ2OTE1OTgxNjIzMzE2.YAoFRA.Ev1Yn2ajoFDMRWpbcipEUden9Bc'
+client = commands.Bot(command_prefix = "&")
+
+@client.event
+async def on_ready():
+    print("bot is ready")
+
+
+
+@client.command(aliases=['g'])
+@commands.has_permissions(manage_roles = True)
+async def give(ctx, role : discord.Role, member : discord.Member):
+    await member.add_roles(role)
+    await ctx.send(f":green_circle: Role {role.mention}succesfully added to {member.mention}!")
+
+@client.command(aliases=['r'])
+@commands.has_permissions(manage_roles = True)
+async def remove(ctx, role : discord.Role, member : discord.Member):
+    await member.remove_roles(role)
+    await ctx.send(f":red_circle: Role {role.mention} is now removed from {member.mention}!")
+
+
+
+@client.command(aliases = ['m'])
+@commands.has_permissions(manage_messages = True)
+async def mute(ctx, member : discord.Member, *,reason=None):
+    guild = ctx.guild
+    mutedRole = discord.utils.get(guild.roles, name="Muted")
+
+    if not mutedRole:
+        mutedRole = await guild.create_role(name = "Muted")
+        
+        for channel in guild.channels:
+            await channel.set_permissions(mutedRole, speak = False, send_messages = False)
+
+    await member.add_roles(mutedRole, reason = reason)
+    await ctx.send(f"{member.mention} has been muted!")
+    await member.send(f"You've been muted in {guild.name} for {reason}")
+
+
+
+
+@client.command(aliases=['um'])
+@commands.has_permissions(manage_messages = True)
+async def unmute(ctx, member : discord.Member):
+    mutedRole = discord.utils.get(ctx.guild.roles, name="Muted")
+
+    
+    await member.remove_roles(mutedRole)
+    await ctx.send(f"{member.mention} has been unmuted!")
+    await member.send(f"You've been unmuted in {ctx.guild.name}!")
+
+@client.command(aliases=['info'])
+async def information(ctx):
+    emd2 = discord.Embed(title = "Commands:speaker::", color=discord.Color.light_grey())
+    emd2.add_field(name="Moderation :tools::",value="(availbe only for staff)", inline = False)
+    emd2.add_field(name="mute", value="muting members", inline=True)
+    emd2.add_field(name="unmute", value="unmuting a member")
+    emd2.add_field(name="kick", value="kicking members", inline=True)
+    emd2.add_field(name="ban", value="banning members")
+    emd2.add_field(name="give and remove", value = "giving and removing roles,type &give @your_role @potato_user,same with remove!", inline = True)
+    emd2.add_field(name="Developper:computer::", value="Dev is Y A H Y A #5882,:flag_ma:morroccan", inline=True)
+    await ctx.send(embed=emd2)
+
+
+@client.command(aliases=['k'])
+@commands.has_permissions(kick_members = True)
+async def kick(ctx, member : discord.Member, *, reason=None):
+    await member.send(f"You've been kicked in {ctx.guild.name} for {reason}")
+    await member.kick(reason=reason)
+    await ctx.send(f"{member.mention} has been kicked :fire:!")
+
+@client.command(aliases=['b'])
+@commands.has_permissions(ban_members = True)
+async def ban(ctx, member : discord.Member, *, reason=None):
+    await member.send(f"You've been banned in {ctx.guild.name} for {reason}")
+    await member.ban(reason=reason)
+    await ctx.send(f"{member.mention} has been banned :hammer:!")
+
+
+
+        
+
+
+client.run(token)
